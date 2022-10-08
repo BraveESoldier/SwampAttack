@@ -11,16 +11,18 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform _shootPoint;
 
     private Weapon _currentWeapon;
+    private int _currentWeaponIndex = 0;
     private int _currentHealth;
     private Animator _animator;
 
     public int Money { get; private set; }
 
     public event UnityAction<int, int> HealthChanched;
+    public event UnityAction<int> MoneyChanched;
 
     private void Start()
     {
-        _currentWeapon = _weaponList[0];
+        ChangeWeapon(_weaponList[_currentWeaponIndex]);
         _currentHealth = _health;
         _animator = GetComponent<Animator>();
     }
@@ -47,11 +49,36 @@ public class Player : MonoBehaviour
     public void AddMoney(int money)
     {
         Money += money;
+        MoneyChanched?.Invoke(Money);
     }
 
     public void BuyWeapon(Weapon weapon)
     {
         Money -= weapon.Price;
+        MoneyChanched?.Invoke(Money);
         _weaponList.Add(weapon);
+    }
+
+    public void NextWeapon()
+    {
+        if (_currentWeaponIndex == _weaponList.Count - 1)
+            _currentWeaponIndex = 0;
+        else _currentWeaponIndex++;
+
+        ChangeWeapon(_weaponList[_currentWeaponIndex]);
+    }
+
+    public void PreviousWeapon()
+    {
+        if(_currentWeaponIndex == 0) 
+            _currentWeaponIndex = _weaponList.Count - 1;
+        else _currentWeaponIndex--;
+
+        ChangeWeapon(_weaponList[_currentWeaponIndex]);
+    }
+
+    private void ChangeWeapon(Weapon weapon)
+    {
+        _currentWeapon = weapon;
     }
 }
